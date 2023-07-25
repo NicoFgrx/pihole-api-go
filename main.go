@@ -31,7 +31,9 @@ func main() {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	fmt.Println(post.Data)
+	for i := 0; i < len(post.Data); i++ {
+		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+	}
 
 	fmt.Println("[+] Create new dns records")
 	res, err = client.AddCustomDNS(
@@ -63,7 +65,9 @@ func main() {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	fmt.Println(post.Data)
+	for i := 0; i < len(post.Data); i++ {
+		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+	}
 
 	fmt.Println("[+] Delete new dns records")
 	res, err = client.DeleteCustomDNS(
@@ -94,6 +98,8 @@ func main() {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	fmt.Println(post.Data)
+	for i := 0; i < len(post.Data); i++ {
+		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+	}
 
 }
