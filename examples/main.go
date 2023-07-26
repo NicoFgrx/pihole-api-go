@@ -32,7 +32,7 @@ func main() {
 	}
 
 	for i := 0; i < len(post.Data); i++ {
-		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
 	}
 
 	fmt.Println("[+] Create new dns records")
@@ -66,7 +66,7 @@ func main() {
 	}
 
 	for i := 0; i < len(post.Data); i++ {
-		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
 	}
 
 	fmt.Println("[+] Delete new dns records")
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	for i := 0; i < len(post.Data); i++ {
-		fmt.Println(fmt.Sprintf("	- %s: %s", post.Data[i][0], post.Data[i][1]))
+		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
 	}
 
 }
