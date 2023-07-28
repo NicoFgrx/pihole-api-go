@@ -11,7 +11,7 @@ import (
 func main() {
 
 	key := "aca1f57abab498806e1c857ce965181ddfabcf7233ee8cf9a9f5806feaef4fc7"
-	url := "http://192.168.1.53"
+	url := "http://192.168.1.53/admin/api.php"
 
 	fmt.Println("[+] Creating client")
 
