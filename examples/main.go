@@ -19,25 +19,18 @@ func main() {
 	client := pihole.NewClient(url, key)
 
 	fmt.Println("[+] Get existing dns records")
-	res, err := client.GetCustomDNS()
+
+	customdns, err := client.GetCustomDNS()
 	if err != nil {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	defer res.Body.Close()
-
-	var post pihole.GetCustomDNSResponse
-
-	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
-		log.Fatalf("An error occured : %s", err)
-	}
-
-	for i := 0; i < len(post.Data); i++ {
-		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
+	for _, record := range customdns {
+		fmt.Printf("	- %s: %s\n", record.Domain, record.IP)
 	}
 
 	fmt.Println("[+] Create new dns records")
-	res, err = client.AddCustomDNS(
+	res, err := client.AddCustomDNS(
 		&pihole.DNSRecordParams{
 			Domain: "box.pasfastoche.lan",
 			IP:     "192.168.1.1",
@@ -56,18 +49,13 @@ func main() {
 	fmt.Println(post2)
 
 	fmt.Println("[+] Get existing dns records")
-	res, err = client.GetCustomDNS()
-
+	customdns, err = client.GetCustomDNS()
 	if err != nil {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
-		log.Fatalf("An error occured : %s", err)
-	}
-
-	for i := 0; i < len(post.Data); i++ {
-		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
+	for _, record := range customdns {
+		fmt.Printf("	- %s: %s\n", record.Domain, record.IP)
 	}
 
 	fmt.Println("[+] Delete new dns records")
@@ -89,18 +77,13 @@ func main() {
 	fmt.Println(post2)
 
 	fmt.Println("[+] Get existing dns records")
-	res, err = client.GetCustomDNS()
-
+	customdns, err = client.GetCustomDNS()
 	if err != nil {
 		log.Fatalf("An error occured : %s", err)
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
-		log.Fatalf("An error occured : %s", err)
-	}
-
-	for i := 0; i < len(post.Data); i++ {
-		fmt.Printf("	- %s: %s\n", post.Data[i][0], post.Data[i][1])
+	for _, record := range customdns {
+		fmt.Printf("	- %s: %s\n", record.Domain, record.IP)
 	}
 
 }

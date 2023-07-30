@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -19,9 +21,8 @@ type PostCustomDNSResponse struct {
 	Message string `json:"message"`
 }
 
-func (client *Client) GetCustomDNS() (*http.Response, error) {
+func (client *Client) GetCustomDNS() ([]DNSRecordParams, error) {
 
-	// NewURL := fmt.Sprintf("%s/admin/api.php?customdns&action=get&auth=%s", client.BaseURL, client.APIKey)
 	NewURL, err := url.Parse(client.BaseURL)
 
 	if err != nil {
@@ -36,13 +37,32 @@ func (client *Client) GetCustomDNS() (*http.Response, error) {
 
 	NewURL.RawQuery = v.Encode()
 
-	resp, err := client.HTTPClient.Get(NewURL.String())
+	res, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	defer res.Body.Close()
+
+	// format output to return array of DNSRecord
+
+	var post GetCustomDNSResponse
+
+	var customdns_lst []DNSRecordParams
+
+	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
+		log.Fatalf("An error occured : %s", err)
+	}
+
+	for i := 0; i < len(post.Data); i++ {
+		customdns_lst = append(customdns_lst, DNSRecordParams{
+			Domain: post.Data[i][0],
+			IP:     post.Data[i][1],
+		})
+	}
+
+	return customdns_lst, nil
 
 }
 
