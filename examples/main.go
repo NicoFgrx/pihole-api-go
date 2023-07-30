@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	pihole "github.com/NicoFgrx/pihole-api-go/api"
 )
 
 func main() {
 
-	key := "aca1f57abab498806e1c857ce965181ddfabcf7233ee8cf9a9f5806feaef4fc7"
-	url := "http://192.168.1.53/admin/api.php"
+	url := os.Getenv("PIHOLE_API_URL") // must be http[s]://<IP>:<port>/admin/api.php
+	key := os.Getenv("PIHOLE_TOKEN")
 
 	fmt.Println("[+] Creating client")
 
