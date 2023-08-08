@@ -169,3 +169,21 @@ func (client *Client) DeleteCustomDNS(params *DNSRecordParams) (*http.Response, 
 	return resp, nil
 
 }
+
+func (client *Client) UpdateCustomDNS(domain string, params *DNSRecordParams) error {
+
+	// Get current record to delete
+	data, err := client.GetCustomDNS(domain)
+	if err != nil {
+		return err
+	}
+
+	// Delete current record
+	client.DeleteCustomDNS(&data)
+
+	// Create new record
+	client.AddCustomDNS(params)
+
+	return nil
+
+}
