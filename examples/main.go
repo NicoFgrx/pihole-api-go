@@ -55,11 +55,27 @@ func main() {
 
 	fmt.Printf("	- %s: %s\n", customdnsrecord.Domain, customdnsrecord.IP)
 
+	fmt.Println("[+] Update the new dns records with different IP")
+	err = client.UpdateCustomDNS("box.pasfastoche.lan", &pihole.DNSRecordParams{
+		Domain: "box.pasfastoche.lan",
+		IP:     "192.168.1.2",
+	})
+	if err != nil {
+		log.Fatalf("An error occured while update dns record : %s", err)
+	}
+
+	fmt.Println("[+] Get the new dns records only")
+	customdnsrecord, err = client.GetCustomDNS("box.pasfastoche.lan")
+	if err != nil {
+		log.Fatalf("An error occured : %s", err)
+	}
+	fmt.Printf("	- %s: %s\n", customdnsrecord.Domain, customdnsrecord.IP)
+
 	fmt.Println("[+] Delete new dns records")
 	res, err = client.DeleteCustomDNS(
 		&pihole.DNSRecordParams{
 			Domain: "box.pasfastoche.lan",
-			IP:     "192.168.1.1",
+			IP:     "192.168.1.2",
 		},
 	)
 
