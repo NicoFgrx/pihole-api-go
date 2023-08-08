@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -100,6 +101,7 @@ func (client *Client) GetCustomDNS(data string) (DNSRecordParams, error) {
 	}
 
 	for i := 0; i < len(post.Data); i++ {
+		fmt.Println(post.Data[i][0])
 		if post.Data[i][0] == data {
 			return DNSRecordParams{
 					Domain: post.Data[i][0],
@@ -179,10 +181,16 @@ func (client *Client) UpdateCustomDNS(domain string, params *DNSRecordParams) er
 	}
 
 	// Delete current record
-	client.DeleteCustomDNS(&data)
+	_, err = client.DeleteCustomDNS(&data)
+	if err != nil {
+		return err
+	}
 
 	// Create new record
-	client.AddCustomDNS(params)
+	_, err = client.AddCustomDNS(params)
+	if err != nil {
+		return err
+	}
 
 	return nil
 
