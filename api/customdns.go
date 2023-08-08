@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -21,7 +22,7 @@ type PostCustomDNSResponse struct {
 	Message string `json:"message"`
 }
 
-func (client *Client) GetCustomDNS() ([]DNSRecordParams, error) {
+func (client *Client) GetAllCustomDNS() ([]DNSRecordParams, error) {
 
 	NewURL, err := url.Parse(client.BaseURL)
 
@@ -63,6 +64,52 @@ func (client *Client) GetCustomDNS() ([]DNSRecordParams, error) {
 	}
 
 	return customdns_lst, nil
+
+}
+
+func (client *Client) GetCustomDNS(data string) (DNSRecordParams, error) {
+
+	NewURL, err := url.Parse(client.BaseURL)
+
+	if err != nil {
+		return DNSRecordParams{}, err
+	}
+
+	v := url.Values{}
+
+	v.Set("customdns", "")
+	v.Set("auth", client.APIKey)
+	v.Set("action", "get")
+
+	NewURL.RawQuery = v.Encode()
+
+	res, err := client.HTTPClient.Get(NewURL.String())
+
+	if err != nil {
+		return DNSRecordParams{}, err
+	}
+
+	defer res.Body.Close()
+
+	// format output to return array of DNSRecord
+
+	var post GetCustomDNSResponse
+
+	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
+		log.Fatalf("An error occured : %s", err)
+	}
+
+	for i := 0; i < len(post.Data); i++ {
+		if post.Data[i][0] == data {
+			return DNSRecordParams{
+					Domain: post.Data[i][0],
+					IP:     post.Data[i][1]},
+				nil
+		}
+
+	}
+
+	return DNSRecordParams{}, errors.New("Records not found")
 
 }
 
