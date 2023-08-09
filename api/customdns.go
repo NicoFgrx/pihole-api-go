@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 )
 
@@ -23,14 +22,19 @@ type PostCustomDNSResponse struct {
 	Message string `json:"message"`
 }
 
+// Ask the pihole API for all existing dns records
+// Return a slice of DNSRecordParams
+// If an error has occured, earlier or with the GET request, the error is return
 func (client *Client) GetAllCustomDNS() ([]DNSRecordParams, error) {
 
+	// Build the url
 	NewURL, err := url.Parse(client.BaseURL)
 
 	if err != nil {
 		return nil, err
 	}
 
+	// Set the url values
 	v := url.Values{}
 
 	v.Set("customdns", "")
@@ -39,6 +43,7 @@ func (client *Client) GetAllCustomDNS() ([]DNSRecordParams, error) {
 
 	NewURL.RawQuery = v.Encode()
 
+	// Send GET request
 	res, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
@@ -47,16 +52,17 @@ func (client *Client) GetAllCustomDNS() ([]DNSRecordParams, error) {
 
 	defer res.Body.Close()
 
-	// format output to return array of DNSRecord
+	// format output to return slice of DNSRecord
 
 	var post GetCustomDNSResponse
-
 	var customdns_lst []DNSRecordParams
 
+	// Decode the slice of slice
 	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
-		log.Fatalf("An error occured : %s", err)
+		log.Fatalf("An error occured while decode the JSON : %s", err)
 	}
 
+	// Build slice of DNSRecordParams
 	for i := 0; i < len(post.Data); i++ {
 		customdns_lst = append(customdns_lst, DNSRecordParams{
 			Domain: post.Data[i][0],
@@ -64,65 +70,45 @@ func (client *Client) GetAllCustomDNS() ([]DNSRecordParams, error) {
 		})
 	}
 
+	// Return the slice
 	return customdns_lst, nil
 
 }
 
-func (client *Client) GetCustomDNS(data string) (DNSRecordParams, error) {
+// Ask the pihole API for all existing dns records then search if the given domain exist
+// Return a DNSRecordParams if it's find in the slice
+// If an error has occured, earlier or if the domain is not founded, the error is return
+func (client *Client) GetCustomDNS(domain string) (DNSRecordParams, error) {
 
-	NewURL, err := url.Parse(client.BaseURL)
-
+	// Fetch all dns records
+	customdns_lst, err := client.GetAllCustomDNS()
 	if err != nil {
 		return DNSRecordParams{}, err
 	}
 
-	v := url.Values{}
-
-	v.Set("customdns", "")
-	v.Set("auth", client.APIKey)
-	v.Set("action", "get")
-
-	NewURL.RawQuery = v.Encode()
-
-	res, err := client.HTTPClient.Get(NewURL.String())
-
-	if err != nil {
-		return DNSRecordParams{}, err
-	}
-
-	defer res.Body.Close()
-
-	// format output to return array of DNSRecord
-
-	var post GetCustomDNSResponse
-
-	if err := json.NewDecoder(res.Body).Decode(&post); err != nil {
-		log.Fatalf("An error occured : %s", err)
-	}
-
-	for i := 0; i < len(post.Data); i++ {
-		fmt.Println(post.Data[i][0])
-		if post.Data[i][0] == data {
-			return DNSRecordParams{
-					Domain: post.Data[i][0],
-					IP:     post.Data[i][1]},
-				nil
+	// Return item if the domain exist in the slice
+	for _, item := range customdns_lst {
+		if item.Domain == domain {
+			return item, nil
 		}
-
 	}
 
+	// Return an error if the domain doesn't exist in the slice
 	return DNSRecordParams{}, errors.New("Records not found")
 
 }
 
-func (client *Client) AddCustomDNS(params *DNSRecordParams) (*http.Response, error) {
+// Ask the pihole API to create a new DNS Record
+// Return true if the operation is a success, return an error if not
+func (client *Client) AddCustomDNS(params *DNSRecordParams) error {
 
-	// NewURL := fmt.Sprintf("%s/admin/api.php?customdns&action=add&auth=%s&ip=%s&domain=%s", client.BaseURL, client.APIKey, params.IP, params.Domain)
+	// Bulid the URL
 	NewURL, err := url.Parse(client.BaseURL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	// Set the url values
 	v := url.Values{}
 
 	v.Set("customdns", "")
@@ -133,25 +119,41 @@ func (client *Client) AddCustomDNS(params *DNSRecordParams) (*http.Response, err
 
 	NewURL.RawQuery = v.Encode()
 
+	// Send GET request
 	resp, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return resp, nil
+	// Check if API Response is true or false
+	var status PostCustomDNSResponse
+
+	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+		log.Fatalf("An error occured while decode the JSON : %s", err)
+	}
+
+	// If the API inform us that the resource cannot be created, return an error
+	if !status.Success {
+		return fmt.Errorf(status.Message)
+
+	}
+
+	return nil
 
 }
 
-func (client *Client) DeleteCustomDNS(params *DNSRecordParams) (*http.Response, error) {
+// Ask the pihole API to delete a new DNS Record
+// Return true if the operation is a success, return an error if not
+func (client *Client) DeleteCustomDNS(params *DNSRecordParams) error {
 
-	// NewURL := fmt.Sprintf("%s/admin/api.php?customdns&action=delete&auth=%s&ip=%s&domain=%s", client.BaseURL, client.APIKey, params.IP, params.Domain)
-
+	// Build the URL
 	NewURL, err := url.Parse(client.BaseURL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
+	// Set url values
 	v := url.Values{}
 
 	v.Set("customdns", "")
@@ -162,16 +164,31 @@ func (client *Client) DeleteCustomDNS(params *DNSRecordParams) (*http.Response, 
 
 	NewURL.RawQuery = v.Encode()
 
+	// Set GET request
 	resp, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return resp, nil
+	// Check if API Response is true or false
+	var status PostCustomDNSResponse
+
+	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+		log.Fatalf("An error occured while decode the JSON : %s", err)
+	}
+
+	// If the API inform us that the resource cannot be created, return an error
+	if !status.Success {
+		return fmt.Errorf(status.Message)
+	}
+
+	return nil
 
 }
 
+// Ask the pihole API to delete, then re-create the dns record
+// If an error has occured, the error is returned
 func (client *Client) UpdateCustomDNS(domain string, params *DNSRecordParams) error {
 
 	// Get current record to delete
@@ -181,13 +198,13 @@ func (client *Client) UpdateCustomDNS(domain string, params *DNSRecordParams) er
 	}
 
 	// Delete current record
-	_, err = client.DeleteCustomDNS(&data)
+	err = client.DeleteCustomDNS(&data)
 	if err != nil {
 		return err
 	}
 
 	// Create new record
-	_, err = client.AddCustomDNS(params)
+	err = client.AddCustomDNS(params)
 	if err != nil {
 		return err
 	}
