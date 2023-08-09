@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -94,7 +93,7 @@ func (client *Client) GetCustomDNS(domain string) (DNSRecordParams, error) {
 	}
 
 	// Return an error if the domain doesn't exist in the slice
-	return DNSRecordParams{}, errors.New("Records not found")
+	return DNSRecordParams{}, fmt.Errorf("Record %s not found", domain)
 
 }
 
