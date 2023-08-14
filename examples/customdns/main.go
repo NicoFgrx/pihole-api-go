@@ -8,14 +8,27 @@ import (
 	pihole "github.com/NicoFgrx/pihole-api-go/api"
 )
 
-func main() {
-
+func Config() pihole.Client {
 	url := os.Getenv("PIHOLE_API_URL") // must be http[s]://<IP>:<port>/admin/api.php
 	key := os.Getenv("PIHOLE_TOKEN")
+
+	if url == "" {
+		url = "http://localhost:8080/admin/api.php"
+	}
+	if key == "" {
+		key = "96cf46f9e9312ea9ad00f5f9e63b25643f701246357068549a6c2ea3d163bf1e"
+	}
 
 	fmt.Println("[+] Creating client")
 
 	client := pihole.NewClient(url, key)
+
+	return *client
+}
+
+func main() {
+
+	client := Config()
 
 	fmt.Println("[+] Get all existing dns records")
 	customdns, err := client.GetAllCustomDNS()
@@ -30,8 +43,8 @@ func main() {
 	fmt.Println("[+] Create new dns records")
 	err = client.AddCustomDNS(
 		&pihole.DNSRecordParams{
-			Domain: "box.pasfastoche.lan",
-			IP:     "192.168.1.1",
+			Domain: "test3.example.com",
+			IP:     "3.3.3.3",
 		},
 	)
 	if err != nil {
@@ -39,7 +52,7 @@ func main() {
 	}
 
 	fmt.Println("[+] Get the new dns records only")
-	customdnsrecord, err := client.GetCustomDNS("box.pasfastoche.lan")
+	customdnsrecord, err := client.GetCustomDNS("test3.example.com")
 	if err != nil {
 		log.Fatalf("An error occured : %s", err)
 	}
@@ -47,16 +60,16 @@ func main() {
 	fmt.Printf("	- %s: %s\n", customdnsrecord.Domain, customdnsrecord.IP)
 
 	fmt.Println("[+] Update the new dns records with different IP")
-	err = client.UpdateCustomDNS("box.pasfastoche.lan", &pihole.DNSRecordParams{
-		Domain: "box.pasfastoche.lan",
-		IP:     "192.168.1.2",
+	err = client.UpdateCustomDNS("test3.example.com", &pihole.DNSRecordParams{
+		Domain: "test3.example.com",
+		IP:     "33.33.33.33",
 	})
 	if err != nil {
 		log.Fatalf("An error occured while update dns record : %s", err)
 	}
 
 	fmt.Println("[+] Get the new dns records only")
-	customdnsrecord, err = client.GetCustomDNS("box.pasfastoche.lan")
+	customdnsrecord, err = client.GetCustomDNS("test3.example.com")
 	if err != nil {
 		log.Fatalf("An error occured : %s", err)
 	}
@@ -65,8 +78,8 @@ func main() {
 	fmt.Println("[+] Delete new dns records")
 	err = client.DeleteCustomDNS(
 		&pihole.DNSRecordParams{
-			Domain: "box.pasfastoche.lan",
-			IP:     "192.168.1.2",
+			Domain: "test3.example.com",
+			IP:     "33.33.33.33",
 		},
 	)
 
