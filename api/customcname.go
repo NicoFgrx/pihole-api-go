@@ -119,16 +119,18 @@ func (client *Client) AddCustomCNAME(params *CNAMERecordParams) error {
 	NewURL.RawQuery = v.Encode()
 
 	// Send GET request
-	resp, err := client.HTTPClient.Get(NewURL.String())
+	res, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
 		return err
 	}
 
+	defer res.Body.Close()
+
 	// Check if API Response is true or false
 	var status PostCustomCNAMEResponse
 
-	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&status); err != nil {
 		log.Fatalf("An error occured while decode the JSON : %s", err)
 	}
 
@@ -164,16 +166,18 @@ func (client *Client) DeleteCustomCNAME(params *CNAMERecordParams) error {
 	NewURL.RawQuery = v.Encode()
 
 	// Set GET request
-	resp, err := client.HTTPClient.Get(NewURL.String())
+	res, err := client.HTTPClient.Get(NewURL.String())
 
 	if err != nil {
 		return err
 	}
 
+	defer res.Body.Close()
+
 	// Check if API Response is true or false
 	var status PostCustomCNAMEResponse
 
-	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&status); err != nil {
 		log.Fatalf("An error occured while decode the JSON : %s", err)
 	}
 
