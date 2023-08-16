@@ -1,4 +1,4 @@
-# pihole-api-go# 
+# pihole-api-go 
 
 **WIP** : pihole-api-go is a go Client for interacting with Pihole by https://pi-hole.net/.
 
@@ -32,17 +32,33 @@ access different parts of the Pihole API. For example:
 
 ```go
 
-	url := "http://localhost:8080/admin/api.php" // must be http[s]://<IP>:<port>/admin/api.php
-	key := "xxx" // find the token on the web UI in Settings>API
+url := "http://localhost:8080/admin/api.php" // must be http[s]://<IP>:<port>/admin/api.php
+key := "xxx" // find the token on the web UI in Settings>API
 
-	client := pihole.NewClient(url, key)
+client := pihole.NewClient(url, key)
 
-    // Get all custom dns defined on the pihole
-    customdns_lst, err := client.GetAllCustomDNS()
+// Get all custom dns defined on the pihole
+customdns_lst, err := client.GetAllCustomDNS()
 
 ```
 
-You can find more examples in examples folder.
+You can find more examples in [examples](./examples) folder.
+
+## Development
+
+Feel free to contribute according to the [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md)
+
+### Setting up the development environment
+
+You can find a docker-compose file in [docker_compose](./docker_compose) folder.
+
+```bash
+
+cd docker_compose
+docker-compose up
+
+```
+Default credential is `example` and only web UI port is listening on `http://localhost:8080`.
 
 
 ## License ##
